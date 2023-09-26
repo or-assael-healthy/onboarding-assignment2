@@ -1,27 +1,28 @@
 export class AsyncQueueConsumer {
-  private callback: Function;
+  private handler: Function;
   private queue: Array<Array<any>>;
   private runQueue: boolean = false;
 
-  constructor(callback: Function, queue: Array<Array<any>>) {
-    this.callback = callback;
+  constructor(handler: Function, queue: Array<Array<any>>) {
+    this.handler = handler;
     this.queue = queue;
   }
 
   public async run() {
     this.runQueue = true;
     while (this.runQueue || this.queue.length > 0) {
-      const nextOperation = this.queue.shift();
+      const nextOperation = this.queue[0];
       if (nextOperation) {
         try {
-          await this.callback(...nextOperation);
+          await this.handler(...nextOperation);
         } catch (e) {
           const parameters = nextOperation.flatMap((x) => x.toString());
-          console.log(
-            `Error in queue callback with parameters: ${parameters}, error: ${e}`
+          console.error(
+            `Error in queue handler with parameters: ${parameters}, error: ${e}`
           );
         }
       }
+      this.queue.shift();
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
   }
