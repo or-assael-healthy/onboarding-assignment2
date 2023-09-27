@@ -1,9 +1,13 @@
-export class AsyncQueueConsumer {
-  private handler: Function;
-  private queue: Array<Array<any>>;
+export type AsyncQueueHandler<T = unknown> = (
+  ...args: T[]
+) => Promise<void> | Promise<unknown>;
+
+export class AsyncQueueConsumer<T = unknown> {
+  private readonly handler: AsyncQueueHandler;
+  private readonly queue: Array<Array<T>>;
   private runQueue: boolean = false;
 
-  constructor(handler: Function, queue: Array<Array<any>>) {
+  constructor(handler: AsyncQueueHandler, queue: Array<Array<T>>) {
     this.handler = handler;
     this.queue = queue;
   }

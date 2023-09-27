@@ -1,18 +1,22 @@
 import { AsyncQueue } from "./AsyncQueue";
+import { setTimeout } from "timers/promises";
 
 const uploadFile = (fileName: string, file: string) =>
-  new Promise<void>((resolve) => {
+  new Promise<void>(async (resolve) => {
     logWrapper(`Started uploading: ${fileName}, ${file}`);
-    setTimeout(() => {
-      logWrapper(`Done uploading: ${fileName}`);
-      resolve();
-    }, 1000);
+    await setTimeout(1000);
+    logWrapper(`Done uploading: ${fileName}`);
+    resolve();
   });
 
-const cleanUp = async (queue: AsyncQueue, timeout = 1000, maxTries = 5) => {
+const cleanUp = async (
+  queue: AsyncQueue<any>,
+  timeout = 1000,
+  maxTries = 5
+) => {
   queue.stop();
   while (queue.getQueueSize() > 0 && maxTries > 0) {
-    await new Promise((resolve) => setTimeout(resolve, timeout));
+    await setTimeout(timeout);
     maxTries--;
   }
 };
@@ -29,7 +33,7 @@ describe("Testing AsyncQueue", () => {
   test("Testing AsyncQueue with one file", async () => {
     // ARRANGE
     logWrapper = jest.fn();
-    const fileUploadQueue = new AsyncQueue(uploadFile);
+    const fileUploadQueue = new AsyncQueue<string>(uploadFile);
 
     // ACT
     fileUploadQueue.add("1", "file1");
@@ -43,7 +47,7 @@ describe("Testing AsyncQueue", () => {
 
   test("Testing AsyncQueue with multiple files", async () => {
     // ARRANGE
-    const fileUploadQueue = new AsyncQueue(uploadFile);
+    const fileUploadQueue = new AsyncQueue<string>(uploadFile);
 
     // ACT
     fileUploadQueue.add("1", "file1");
@@ -71,9 +75,9 @@ describe("Testing AsyncQueue", () => {
       if (shouldThrow) {
         throw new Error(errorMessage);
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await setTimeout(1000);
     };
-    const throwQueue = new AsyncQueue(functionThatThrowsifTrue);
+    const throwQueue = new AsyncQueue<boolean>(functionThatThrowsifTrue);
 
     // ACT
     throwQueue.add(false);
@@ -94,10 +98,10 @@ describe("Testing AsyncQueue", () => {
 
   test("Testing queue will finish all items after stopping it", async () => {
     // ARRANGE
-    const functionThatDoesNothing = jest.fn(() => {
-      return new Promise((resolve) => setTimeout(resolve, 1000));
+    const functionThatDoesNothing = jest.fn(async () => {
+      await setTimeout(1000);
     });
-    const queue = new AsyncQueue(functionThatDoesNothing);
+    const queue = new AsyncQueue<void>(functionThatDoesNothing);
     // ACT
     queue.add();
     queue.add();

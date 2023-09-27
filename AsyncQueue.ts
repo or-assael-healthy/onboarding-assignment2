@@ -1,14 +1,14 @@
-import { AsyncQueueConsumer } from "./AsyncQueueConsumer";
+import { AsyncQueueConsumer, AsyncQueueHandler } from "./AsyncQueueConsumer";
 
-export class AsyncQueue {
-  private queue: Array<Array<any>> = [];
-  private consumer: AsyncQueueConsumer;
+export class AsyncQueue<T = unknown> {
+  private queue: Array<Array<T>> = [];
+  private consumer: AsyncQueueConsumer<T>;
 
-  constructor(handler: Function) {
+  constructor(handler: AsyncQueueHandler) {
     this.consumer = new AsyncQueueConsumer(handler, this.queue);
   }
 
-  public add(...args: any[]) {
+  public add(...args: T[]) {
     this.queue.push(args);
 
     if (!this.consumer.isRunning()) {
