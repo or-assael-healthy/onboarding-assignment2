@@ -21,9 +21,7 @@ const cleanUp = async (
   }
 };
 
-let logWrapper = (message: string) => {
-  console.log(message);
-};
+const logWrapper = jest.fn();
 
 describe("Testing AsyncQueue", () => {
   beforeEach(() => {
@@ -32,7 +30,6 @@ describe("Testing AsyncQueue", () => {
 
   test("Testing AsyncQueue with one file", async () => {
     // ARRANGE
-    logWrapper = jest.fn();
     const fileUploadQueue = new AsyncQueue<string>(uploadFile);
 
     // ACT
@@ -41,8 +38,11 @@ describe("Testing AsyncQueue", () => {
 
     // ASSERT
     expect(logWrapper).toHaveBeenCalledTimes(2);
-    expect(logWrapper).toHaveBeenCalledWith("Started uploading: 1, file1");
-    expect(logWrapper).toHaveBeenCalledWith("Done uploading: 1");
+    expect(logWrapper).toHaveBeenNthCalledWith(
+      1,
+      "Started uploading: 1, file1"
+    );
+    expect(logWrapper).toHaveBeenNthCalledWith(2, "Done uploading: 1");
   });
 
   test("Testing AsyncQueue with multiple files", async () => {
@@ -89,7 +89,8 @@ describe("Testing AsyncQueue", () => {
 
     // ASSERT
     expect(throwQueue.getQueueSize()).toBe(0);
-    expect(errorSpy).toHaveBeenCalledWith(
+    expect(errorSpy).toHaveBeenNthCalledWith(
+      1,
       `Error in queue handler with parameters: true, error: Error: ${errorMessage}`
     );
 
