@@ -4,8 +4,8 @@ export class AsyncQueue<T = unknown> {
   private queue: Array<Array<T>> = [];
   private consumer: AsyncQueueConsumer<T>;
 
-  constructor(handler: AsyncQueueHandler) {
-    this.consumer = new AsyncQueueConsumer(handler, this.queue);
+  constructor(handler: AsyncQueueHandler<T>) {
+    this.consumer = new AsyncQueueConsumer<T>(handler, this.queue);
   }
 
   public add(...args: T[]) {

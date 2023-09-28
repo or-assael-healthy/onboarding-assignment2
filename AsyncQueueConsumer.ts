@@ -3,11 +3,11 @@ export type AsyncQueueHandler<T = unknown> = (
 ) => Promise<void> | Promise<unknown>;
 
 export class AsyncQueueConsumer<T = unknown> {
-  private readonly handler: AsyncQueueHandler;
+  private readonly handler: AsyncQueueHandler<T>;
   private readonly queue: Array<Array<T>>;
   private runQueue: boolean = false;
 
-  constructor(handler: AsyncQueueHandler, queue: Array<Array<T>>) {
+  constructor(handler: AsyncQueueHandler<T>, queue: Array<Array<T>>) {
     this.handler = handler;
     this.queue = queue;
   }
@@ -20,10 +20,7 @@ export class AsyncQueueConsumer<T = unknown> {
         try {
           await this.handler(...nextOperation);
         } catch (e) {
-          const parameters = nextOperation.flatMap((x) => x.toString());
-          console.error(
-            `Error in queue handler with parameters: ${parameters}, error: ${e}`
-          );
+          console.error(`Error in queue handler. error: ${e}`);
         }
       }
       this.queue.shift();
